@@ -1,5 +1,6 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>images/shutter.svg</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>images/shutter.svg</file>
+        <file>images/logo.svg</file>
+    </qresource>
 </RCC>
