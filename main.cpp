@@ -62,7 +62,6 @@ int main(int argc, char *argv[])
     DApplication::loadDXcbPlugin();
     DApplication app(argc, argv);
     app.setAttribute(Qt::AA_UseHighDpiPixmaps);
-    app.setTheme("light");
     app.setOrganizationName("deepin");
     app.setApplicationName("deepin camera");
     app.setApplicationVersion("1.0");
@@ -70,9 +69,12 @@ int main(int argc, char *argv[])
     app.setProductName("Deepin Camera");
     app.setApplicationDescription("Camera for deepin.");
     //DMainWindow camera;
-    //camera.show ();
     Camera camera;
+    camera.setMinimumSize(800, 600);
+
     camera.show();
+
+    Dtk::Widget::moveToCenter(&camera);
 
     return app.exec();
 };
