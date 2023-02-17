@@ -1,17 +1,18 @@
 #ifndef VIDEOSETTINGS_H
 #define VIDEOSETTINGS_H
 
-#include <QDialog>
 #include <QAudioEncoderSettings>
 #include <QVideoEncoderSettings>
 
-QT_BEGIN_NAMESPACE
-class QComboBox;
-class QMediaRecorder;
-namespace Ui { class VideoSettingsUi; }
-QT_END_NAMESPACE
+#include <DDialog>
 
-class VideoSettings : public QDialog
+DWIDGET_USE_NAMESPACE
+
+class QComboBox;
+class QSlider;
+class QMediaRecorder;
+
+class VideoSettings : public DDialog
 {
     Q_OBJECT
 
@@ -35,8 +36,15 @@ private:
     QVariant boxValue(const QComboBox*) const;
     void selectComboBoxItem(QComboBox *box, const QVariant &value);
 
-    Ui::VideoSettingsUi *ui;
+    QComboBox *audioCodecBox;
+    QComboBox *audioSampleRateBox;
+    QSlider *audioQualitySlider;
+    QComboBox *videoCodecBox;
+    QSlider *videoQualitySlider;
+    QComboBox *videoResolutionBox;
+    QComboBox *videoFramerateBox;
+    QComboBox *containerFormatBox;
     QMediaRecorder *mediaRecorder;
 };
 
-#endif // VIDEOSETTINGS_H
+#endif

@@ -1,48 +1,72 @@
 #include "imagesettings.h"
-#include "ui_imagesettings.h"
 
 #include <QComboBox>
+#include <QSlider>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QDialogButtonBox>
 #include <QDebug>
 #include <QCameraImageCapture>
 #include <QMediaService>
-
+#include <QPushButton>
 
 ImageSettings::ImageSettings(QCameraImageCapture *imageCapture, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::ImageSettingsUi),
+    DDialog(parent),
     imagecapture(imageCapture)
 {
-    ui->setupUi(this);
+    setTitle(tr("Image Settings"));
+    setIcon(QIcon::fromTheme("camera-photo"));
 
-    //image codecs
-    ui->imageCodecBox->addItem(tr("Default image format"), QVariant(QString()));
+    QWidget *widget = new QWidget(this);
+    QVBoxLayout *mainLayout = new QVBoxLayout(widget);
+
+    QGroupBox *groupBox = new QGroupBox(tr("Image"), widget);
+    QFormLayout *formLayout = new QFormLayout(groupBox);
+
+    imageResolutionBox = new QComboBox(groupBox);
+    imageResolutionBox->addItem(tr("Default Resolution"));
+    const QList<QSize> supportedResolutions = imagecapture->supportedResolutions();
+    for (const QSize &resolution : supportedResolutions) {
+        imageResolutionBox->addItem(QString("%1x%2").arg(resolution.width()).arg(resolution.height()),
+                                    QVariant(resolution));
+    }
+    formLayout->addRow(tr("Resolution:"), imageResolutionBox);
+
+    imageCodecBox = new QComboBox(groupBox);
+    imageCodecBox->addItem(tr("Default image format"), QVariant(QString()));
     const QStringList supportedImageCodecs = imagecapture->supportedImageCodecs();
     for (const QString &codecName : supportedImageCodecs) {
         QString description = imagecapture->imageCodecDescription(codecName);
-        ui->imageCodecBox->addItem(codecName + ": " + description, QVariant(codecName));
+        imageCodecBox->addItem(codecName + ": " + description, QVariant(codecName));
     }
+    formLayout->addRow(tr("Image Format:"), imageCodecBox);
 
-    ui->imageQualitySlider->setRange(0, int(QMultimedia::VeryHighQuality));
+    imageQualitySlider = new QSlider(Qt::Horizontal, groupBox);
+    imageQualitySlider->setRange(0, int(QMultimedia::VeryHighQuality));
+    formLayout->addRow(tr("Quality:"), imageQualitySlider);
 
-    ui->imageResolutionBox->addItem(tr("Default Resolution"));
-    const QList<QSize> supportedResolutions = imagecapture->supportedResolutions();
-    for (const QSize &resolution : supportedResolutions) {
-        ui->imageResolutionBox->addItem(QString("%1x%2").arg(resolution.width()).arg(resolution.height()),
-                                        QVariant(resolution));
-    }
+    mainLayout->addWidget(groupBox);
+    addContent(widget);
+
+    QPushButton *okButton = new QPushButton(tr("OK"));
+    QPushButton *cancelButton = new QPushButton(tr("Cancel"));
+    addButton(okButton, true);
+    addButton(cancelButton, false);
+    connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 }
 
 ImageSettings::~ImageSettings()
 {
-    delete ui;
 }
 
 void ImageSettings::changeEvent(QEvent *e)
 {
-    QDialog::changeEvent(e);
+    DDialog::changeEvent(e);
     switch (e->type()) {
     case QEvent::LanguageChange:
-        ui->retranslateUi(this);
         break;
     default:
         break;
@@ -52,18 +76,18 @@ void ImageSettings::changeEvent(QEvent *e)
 QImageEncoderSettings ImageSettings::imageSettings() const
 {
     QImageEncoderSettings settings = imagecapture->encodingSettings();
-    settings.setCodec(boxValue(ui->imageCodecBox).toString());
-    settings.setQuality(QMultimedia::EncodingQuality(ui->imageQualitySlider->value()));
-    settings.setResolution(boxValue(ui->imageResolutionBox).toSize());
+    settings.setCodec(boxValue(imageCodecBox).toString());
+    settings.setQuality(QMultimedia::EncodingQuality(imageQualitySlider->value()));
+    settings.setResolution(boxValue(imageResolutionBox).toSize());
 
     return settings;
 }
 
 void ImageSettings::setImageSettings(const QImageEncoderSettings &imageSettings)
 {
-    selectComboBoxItem(ui->imageCodecBox, QVariant(imageSettings.codec()));
-    selectComboBoxItem(ui->imageResolutionBox, QVariant(imageSettings.resolution()));
-    ui->imageQualitySlider->setValue(imageSettings.quality());
+    selectComboBoxItem(imageCodecBox, QVariant(imageSettings.codec()));
+    selectComboBoxItem(imageResolutionBox, QVariant(imageSettings.resolution()));
+    imageQualitySlider->setValue(imageSettings.quality());
 }
 
 QVariant ImageSettings::boxValue(const QComboBox *box) const
