@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Camera</class>
- <widget class="QMainWindow" name="Camera">
+ <widget class="DMainWindow" name="Camera">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Camera</string>
+   <string>Deepin Camera</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QStackedWidget" name="stackedWidget">
@@ -35,18 +35,18 @@
        <colorrole role="Base">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="Window">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>145</red>
-          <green>145</green>
-          <blue>145</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </colorrole>
@@ -55,18 +55,18 @@
        <colorrole role="Base">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="Window">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>145</red>
-          <green>145</green>
-          <blue>145</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </colorrole>
@@ -75,18 +75,18 @@
        <colorrole role="Base">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>145</red>
-          <green>145</green>
-          <blue>145</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="Window">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>145</red>
-          <green>145</green>
-          <blue>145</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </colorrole>
@@ -144,6 +144,20 @@
          <string>Image</string>
         </attribute>
         <layout class="QFormLayout" name="formLayout">
+         <item row="1" column="0">
+          <widget class="QPushButton" name="takeImageButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Capture Photo</string>
+           </property>
+           <property name="icon">
+            <iconset resource="camera.qrc">
+             <normaloff>:/images/shutter.svg</normaloff>:/images/shutter.svg</iconset>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="1">
           <widget class="QPushButton" name="lockButton">
            <property name="text">
@@ -158,7 +172,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="2" column="1">
           <widget class="QSlider" name="exposureCompensation">
            <property name="minimum">
             <number>-4</number>
@@ -174,20 +188,6 @@
            </property>
            <property name="tickPosition">
             <enum>QSlider::TicksAbove</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QPushButton" name="takeImageButton">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Capture Photo</string>
-           </property>
-           <property name="icon">
-            <iconset resource="camera.qrc">
-             <normaloff>:/images/shutter.svg</normaloff>:/images/shutter.svg</iconset>
            </property>
           </widget>
          </item>
@@ -271,9 +271,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionStartCamera"/>
-    <addaction name="actionStopCamera"/>
-    <addaction name="separator"/>
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -292,16 +289,6 @@
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionStartCamera">
-   <property name="text">
-    <string>Start Camera</string>
-   </property>
-  </action>
-  <action name="actionStopCamera">
-   <property name="text">
-    <string>Stop Camera</string>
-   </property>
-  </action>
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
@@ -310,20 +297,18 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>DMainWindow</class>
+   <extends>QMainWindow</extends>
+   <header>DMainWindow</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>QCameraViewfinder</class>
    <extends>QWidget</extends>
    <header>qcameraviewfinder.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>exposureCompensation</tabstop>
-  <tabstop>recordButton</tabstop>
-  <tabstop>pauseButton</tabstop>
- </tabstops>
- <resources>
-  <include location="camera.qrc"/>
- </resources>
  <connections>
   <connection>
    <sender>actionExit</sender>
@@ -346,38 +331,6 @@
    <signal>triggered()</signal>
    <receiver>Camera</receiver>
    <slot>configureCaptureSettings()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>333</x>
-     <y>210</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionStartCamera</sender>
-   <signal>triggered()</signal>
-   <receiver>Camera</receiver>
-   <slot>startCamera()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>333</x>
-     <y>210</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionStopCamera</sender>
-   <signal>triggered()</signal>
-   <receiver>Camera</receiver>
-   <slot>stopCamera()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

@@ -16,7 +16,13 @@
 
 #include <DApplication>
 #include <DMainWindow>
+#include <DTitlebar>
+#include <DDialog>
+#include <DAboutDialog>
 #include <DWidgetUtil>
+#include <DFileDialog>
+
+DWIDGET_USE_NAMESPACE
 
 Q_DECLARE_METATYPE(QCameraInfo)
 
@@ -24,7 +30,18 @@ Camera::Camera() : ui(new Ui::Camera)
 {
     ui->setupUi(this);
 
-    //Camera devices:
+    setWindowTitle(tr("Deepin Camera"));
+    setMinimumSize(800, 600);
+
+    titlebar()->setIcon(QIcon(":/images/logo.svg"));
+    titlebar()->setTitle(tr("Deepin Camera"));
+
+    QAction *aboutAction = new QAction(tr("About"), this);
+    connect(aboutAction, &QAction::triggered, this, &Camera::showAboutDialog);
+    titlebar()->setMenu(aboutAction);
+
+    ui->actionStartCamera->setVisible(false);
+    ui->actionStopCamera->setVisible(false);
 
     QActionGroup *videoDevicesGroup = new QActionGroup(this);
     videoDevicesGroup->setExclusive(true);
@@ -41,6 +58,9 @@ Camera::Camera() : ui(new Ui::Camera)
 
     connect(videoDevicesGroup, &QActionGroup::triggered, this, &Camera::updateCameraDevice);
     connect(ui->captureWidget, &QTabWidget::currentChanged, this, &Camera::updateCaptureMode);
+
+    connect(ui->stopButton, &QPushButton::clicked, this, &Camera::stop);
+    connect(ui->muteButton, &QPushButton::clicked, this, &Camera::setMuted);
 
     setCamera(QCameraInfo::defaultCamera());
 }
@@ -61,7 +81,7 @@ void Camera::setCamera(const QCameraInfo &cameraInfo)
     connect(m_mediaRecorder.data(), QOverload<QMediaRecorder::Error>::of(&QMediaRecorder::error),
             this, &Camera::displayRecorderError);
 
-    m_mediaRecorder->setMetaData(QMediaMetaData::Title, QVariant(QLatin1String("Test Title")));
+    m_mediaRecorder->setMetaData(QMediaMetaData::Title, QVariant(QLatin1String("Deepin Camera")));
 
     connect(ui->exposureCompensation, &QAbstractSlider::valueChanged, this, &Camera::setExposureCompensation);
 
@@ -110,7 +130,7 @@ void Camera::keyPressEvent(QKeyEvent * event)
         event->accept();
         break;
     default:
-        QMainWindow::keyPressEvent(event);
+        DMainWindow::keyPressEvent(event);
     }
 }
 
@@ -124,13 +144,13 @@ void Camera::keyReleaseEvent(QKeyEvent *event)
         m_camera->unlock();
         break;
     default:
-        QMainWindow::keyReleaseEvent(event);
+        DMainWindow::keyReleaseEvent(event);
     }
 }
 
 void Camera::updateRecordTime()
 {
-    QString str = QString("Recorded %1 sec").arg(m_mediaRecorder->duration()/1000);
+    QString str = QString(tr("Recorded %1 sec")).arg(m_mediaRecorder->duration()/1000);
     ui->statusbar->showMessage(str);
 }
 
@@ -143,7 +163,6 @@ void Camera::processCapturedImage(int requestId, const QImage& img)
 
     ui->lastImagePreviewLabel->setPixmap(QPixmap::fromImage(scaledImage));
 
-    // Display captured image for 4 seconds.
     displayCapturedImage();
     QTimer::singleShot(4000, this, &Camera::displayViewfinder);
 }
@@ -269,7 +288,14 @@ void Camera::displayCaptureError(int id, const QCameraImageCapture::Error error,
 {
     Q_UNUSED(id);
     Q_UNUSED(error);
-    QMessageBox::warning(this, tr("Image Capture Error"), errorString);
+
+    DDialog dialog(this);
+    dialog.setTitle(tr("Image Capture Error"));
+    dialog.setMessage(errorString);
+    dialog.setIcon(DDialog::WarningIcon);
+    dialog.addButton(tr("OK"));
+    dialog.exec();
+
     m_isCapturingImage = false;
 }
 
@@ -338,12 +364,22 @@ void Camera::setExposureCompensation(int index)
 
 void Camera::displayRecorderError()
 {
-    QMessageBox::warning(this, tr("Capture Error"), m_mediaRecorder->errorString());
+    DDialog dialog(this);
+    dialog.setTitle(tr("Capture Error"));
+    dialog.setMessage(m_mediaRecorder->errorString());
+    dialog.setIcon(DDialog::WarningIcon);
+    dialog.addButton(tr("OK"));
+    dialog.exec();
 }
 
 void Camera::displayCameraError()
 {
-    QMessageBox::warning(this, tr("Camera Error"), m_camera->errorString());
+    DDialog dialog(this);
+    dialog.setTitle(tr("Camera Error"));
+    dialog.setMessage(m_camera->errorString());
+    dialog.setIcon(DDialog::WarningIcon);
+    dialog.addButton(tr("OK"));
+    dialog.exec();
 }
 
 void Camera::updateCameraDevice(QAction *action)
@@ -385,4 +421,15 @@ void Camera::closeEvent(QCloseEvent *event)
     } else {
         event->accept();
     }
+}
+
+void Camera::showAboutDialog()
+{
+    DAboutDialog aboutDialog(this);
+    aboutDialog.setProductIcon(QIcon(":/images/logo.svg"));
+    aboutDialog.setProductName(tr("Deepin Camera"));
+    aboutDialog.setVersion(tr("1.0"));
+    aboutDialog.setDescription(tr("Camera application for Deepin Desktop Environment"));
+    aboutDialog.setWebsiteLink("https://www.deepin.org");
+    aboutDialog.exec();
 }

@@ -6,16 +6,18 @@
 #include <QMediaRecorder>
 #include <QScopedPointer>
 
-#include <QMainWindow>
-#include <DApplication>
 #include <DMainWindow>
+#include <DTitlebar>
+#include <DDialog>
 #include <DWidgetUtil>
+
+DWIDGET_USE_NAMESPACE
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Camera; }
 QT_END_NAMESPACE
 
-class Camera : public QMainWindow
+class Camera : public DMainWindow
 {
     Q_OBJECT
 
@@ -61,6 +63,9 @@ private slots:
 
     void readyForCapture(bool ready);
     void imageSaved(int id, const QString &fileName);
+
+    void showAboutDialog();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
