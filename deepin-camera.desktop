@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Deepin Camera
+Name[zh_CN]=相机
+Comment=Camera application for Deepin Desktop Environment
+Comment[zh_CN]=Deepin 相机应用
+Exec=deepin-camera
+Icon=deepin-camera
+Terminal=false
+Type=Application
+Categories=Graphics;Photography;
+X-Deepin-Vendor=deepin

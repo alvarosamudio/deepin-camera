@@ -17,12 +17,20 @@ SOURCES = \
     videosettings.cpp
 
 FORMS += \
-    camera.ui \
-    videosettings.ui \
-    imagesettings.ui
+    camera.ui
 
 RESOURCES += camera.qrc
 
+isEmpty(PREFIX) {
+    PREFIX = /usr
+}
 
+target.path = $$PREFIX/bin
 
+desktop.path = $$PREFIX/share/applications/
+desktop.files = deepin-camera.desktop
 
+icons.path = $$PREFIX/share/icons/hicolor/scalable/apps/
+icons.files = images/logo.svg
+
+INSTALLS += target desktop icons
