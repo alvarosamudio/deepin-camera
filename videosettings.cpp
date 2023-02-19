@@ -108,12 +108,10 @@ VideoSettings::VideoSettings(QMediaRecorder *mediaRecorder, QWidget *parent) :
 
     addContent(widget);
 
-    QPushButton *okButton = new QPushButton(tr("OK"));
-    QPushButton *cancelButton = new QPushButton(tr("Cancel"));
-    addButton(okButton, true);
-    addButton(cancelButton, false);
-    connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
-    connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+    addButton(tr("OK"), true, DDialog::ButtonNormal);
+    addButton(tr("Cancel"), false, DDialog::ButtonNormal);
+    connect(this, &DDialog::accepted, this, &QDialog::accept);
+    connect(this, &DDialog::rejected, this, &QDialog::reject);
 }
 
 VideoSettings::~VideoSettings()

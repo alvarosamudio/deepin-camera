@@ -38,10 +38,9 @@ Camera::Camera() : ui(new Ui::Camera)
 
     QAction *aboutAction = new QAction(tr("About"), this);
     connect(aboutAction, &QAction::triggered, this, &Camera::showAboutDialog);
-    titlebar()->setMenu(aboutAction);
-
-    ui->actionStartCamera->setVisible(false);
-    ui->actionStopCamera->setVisible(false);
+    QMenu *aboutMenu = new QMenu(this);
+    aboutMenu->addAction(aboutAction);
+    titlebar()->setMenu(aboutMenu);
 
     QActionGroup *videoDevicesGroup = new QActionGroup(this);
     videoDevicesGroup->setExclusive(true);
@@ -292,7 +291,7 @@ void Camera::displayCaptureError(int id, const QCameraImageCapture::Error error,
     DDialog dialog(this);
     dialog.setTitle(tr("Image Capture Error"));
     dialog.setMessage(errorString);
-    dialog.setIcon(DDialog::WarningIcon);
+    dialog.setIcon(QIcon::fromTheme("dialog-warning"));
     dialog.addButton(tr("OK"));
     dialog.exec();
 
@@ -322,15 +321,11 @@ void Camera::updateCameraState(QCamera::State state)
 {
     switch (state) {
     case QCamera::ActiveState:
-        ui->actionStartCamera->setEnabled(false);
-        ui->actionStopCamera->setEnabled(true);
         ui->captureWidget->setEnabled(true);
         ui->actionSettings->setEnabled(true);
         break;
     case QCamera::UnloadedState:
     case QCamera::LoadedState:
-        ui->actionStartCamera->setEnabled(true);
-        ui->actionStopCamera->setEnabled(false);
         ui->captureWidget->setEnabled(false);
         ui->actionSettings->setEnabled(false);
     }
@@ -367,7 +362,7 @@ void Camera::displayRecorderError()
     DDialog dialog(this);
     dialog.setTitle(tr("Capture Error"));
     dialog.setMessage(m_mediaRecorder->errorString());
-    dialog.setIcon(DDialog::WarningIcon);
+    dialog.setIcon(QIcon::fromTheme("dialog-warning"));
     dialog.addButton(tr("OK"));
     dialog.exec();
 }
@@ -377,7 +372,7 @@ void Camera::displayCameraError()
     DDialog dialog(this);
     dialog.setTitle(tr("Camera Error"));
     dialog.setMessage(m_camera->errorString());
-    dialog.setIcon(DDialog::WarningIcon);
+    dialog.setIcon(QIcon::fromTheme("dialog-warning"));
     dialog.addButton(tr("OK"));
     dialog.exec();
 }

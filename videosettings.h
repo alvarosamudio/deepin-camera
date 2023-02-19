@@ -3,6 +3,9 @@
 
 #include <QAudioEncoderSettings>
 #include <QVideoEncoderSettings>
+#include <QSlider>
+#include <QComboBox>
+#include <QEvent>
 
 #include <DDialog>
 
