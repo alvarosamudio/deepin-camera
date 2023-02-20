@@ -1,0 +1,20 @@
+# Build artifacts
+Makefile
+.qmake.stash
+*.o
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+moc_predefs.h
+deepin-camera
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# System
+*.deb
+*.rpm
