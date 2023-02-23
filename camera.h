@@ -9,7 +9,11 @@
 #include <DMainWindow>
 #include <DTitlebar>
 #include <DDialog>
+#include <DAboutDialog>
+#include <DAlertControl>
 #include <DWidgetUtil>
+#include <DFileDialog>
+#include <DIconButton>
 
 DWIDGET_USE_NAMESPACE
 
@@ -72,6 +76,10 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
+    void setupTitlebar();
+    void setupButtons();
+    void showAlert(const QString &message, int duration = 3000);
+
     Ui::Camera *ui;
 
     QScopedPointer<QCamera> m_camera;
@@ -84,6 +92,9 @@ private:
     QString m_videoContainerFormat;
     bool m_isCapturingImage = false;
     bool m_applicationExiting = false;
+
+    DAlertControl *m_alertControl = nullptr;
+    QMenu *m_devicesMenu = nullptr;
 };
 
 #endif

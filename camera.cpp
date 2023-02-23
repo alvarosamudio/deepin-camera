@@ -21,6 +21,8 @@
 #include <DAboutDialog>
 #include <DWidgetUtil>
 #include <DFileDialog>
+#include <DIconButton>
+#include <DAlertControl>
 
 DWIDGET_USE_NAMESPACE
 
@@ -36,11 +38,8 @@ Camera::Camera() : ui(new Ui::Camera)
     titlebar()->setIcon(QIcon(":/images/logo.svg"));
     titlebar()->setTitle(tr("Deepin Camera"));
 
-    QAction *aboutAction = new QAction(tr("About"), this);
-    connect(aboutAction, &QAction::triggered, this, &Camera::showAboutDialog);
-    QMenu *aboutMenu = new QMenu(this);
-    aboutMenu->addAction(aboutAction);
-    titlebar()->setMenu(aboutMenu);
+    setupTitlebar();
+    setupButtons();
 
     QActionGroup *videoDevicesGroup = new QActionGroup(this);
     videoDevicesGroup->setExclusive(true);
@@ -52,16 +51,56 @@ Camera::Camera() : ui(new Ui::Camera)
         if (cameraInfo == QCameraInfo::defaultCamera())
             videoDeviceAction->setChecked(true);
 
-        ui->menuDevices->addAction(videoDeviceAction);
+        m_devicesMenu->addAction(videoDeviceAction);
     }
 
     connect(videoDevicesGroup, &QActionGroup::triggered, this, &Camera::updateCameraDevice);
     connect(ui->captureWidget, &QTabWidget::currentChanged, this, &Camera::updateCaptureMode);
 
     connect(ui->stopButton, &QPushButton::clicked, this, &Camera::stop);
-    connect(ui->muteButton, &QPushButton::clicked, this, &Camera::setMuted);
+    connect(ui->muteButton, &DSwitchButton::toggled, this, &Camera::setMuted);
 
     setCamera(QCameraInfo::defaultCamera());
+}
+
+void Camera::setupTitlebar()
+{
+    QMenu *fileMenu = new QMenu(tr("File"), this);
+    QAction *settingsAction = fileMenu->addAction(QIcon::fromTheme("settings"), tr("Settings"));
+    connect(settingsAction, &QAction::triggered, this, &Camera::configureCaptureSettings);
+    fileMenu->addSeparator();
+    QAction *exitAction = fileMenu->addAction(QIcon::fromTheme("window-close"), tr("Exit"));
+    connect(exitAction, &QAction::triggered, this, &QWidget::close);
+
+    m_devicesMenu = new QMenu(tr("Devices"), this);
+
+    QMenu *helpMenu = new QMenu(tr("Help"), this);
+    QAction *aboutAction = helpMenu->addAction(QIcon::fromTheme("help-about"), tr("About"));
+    connect(aboutAction, &QAction::triggered, this, &Camera::showAboutDialog);
+
+    QMenu *mainMenu = new QMenu(this);
+    mainMenu->addMenu(fileMenu);
+    mainMenu->addMenu(m_devicesMenu);
+    mainMenu->addSeparator();
+    mainMenu->addMenu(helpMenu);
+    titlebar()->setMenu(mainMenu);
+}
+
+void Camera::setupButtons()
+{
+    ui->captureButton->setFixedSize(64, 64);
+    ui->captureButton->setIconSize(QSize(36, 36));
+
+    ui->recordButton->setFixedSize(50, 50);
+    ui->recordButton->setIcon(QIcon::fromTheme("media-record"));
+
+    ui->pauseButton->setFixedSize(50, 50);
+    ui->pauseButton->setIcon(QIcon::fromTheme("media-playback-pause"));
+
+    ui->stopButton->setFixedSize(50, 50);
+    ui->stopButton->setIcon(QIcon::fromTheme("media-playback-stop"));
+
+    m_alertControl = new DAlertControl(this, this);
 }
 
 void Camera::setCamera(const QCameraInfo &cameraInfo)
@@ -104,6 +143,13 @@ void Camera::setCamera(const QCameraInfo &cameraInfo)
 
     updateCaptureMode();
     m_camera->start();
+}
+
+void Camera::showAlert(const QString &message, int duration)
+{
+    if (m_alertControl) {
+        m_alertControl->showAlertMessage(message, duration);
+    }
 }
 
 void Camera::keyPressEvent(QKeyEvent * event)
@@ -149,8 +195,12 @@ void Camera::keyReleaseEvent(QKeyEvent *event)
 
 void Camera::updateRecordTime()
 {
-    QString str = QString(tr("Recorded %1 sec")).arg(m_mediaRecorder->duration()/1000);
-    ui->statusbar->showMessage(str);
+    int secs = m_mediaRecorder->duration() / 1000;
+    int minutes = secs / 60;
+    secs = secs % 60;
+    ui->recordTimeLabel->setText(QString("%1:%2")
+        .arg(minutes, 2, 10, QLatin1Char('0'))
+        .arg(secs, 2, 10, QLatin1Char('0')));
 }
 
 void Camera::processCapturedImage(int requestId, const QImage& img)
@@ -183,7 +233,6 @@ void Camera::configureCaptureSettings()
 void Camera::configureVideoSettings()
 {
     VideoSettings settingsDialog(m_mediaRecorder.data());
-    settingsDialog.setWindowFlags(settingsDialog.windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     settingsDialog.setAudioSettings(m_audioSettings);
     settingsDialog.setVideoSettings(m_videoSettings);
@@ -207,7 +256,6 @@ void Camera::configureVideoSettings()
 void Camera::configureImageSettings()
 {
     ImageSettings settingsDialog(m_imageCapture.data());
-    settingsDialog.setWindowFlags(settingsDialog.windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     settingsDialog.setImageSettings(m_imageSettings);
 
@@ -221,16 +269,19 @@ void Camera::record()
 {
     m_mediaRecorder->record();
     updateRecordTime();
+    showAlert(tr("Recording started"));
 }
 
 void Camera::pause()
 {
     m_mediaRecorder->pause();
+    showAlert(tr("Recording paused"));
 }
 
 void Camera::stop()
 {
     m_mediaRecorder->stop();
+    ui->recordTimeLabel->setText(tr("00:00"));
 }
 
 void Camera::setMuted(bool muted)
@@ -252,29 +303,21 @@ void Camera::toggleLock()
 
 void Camera::updateLockStatus(QCamera::LockStatus status, QCamera::LockChangeReason reason)
 {
-    QColor indicationColor = Qt::black;
-
     switch (status) {
     case QCamera::Searching:
-        indicationColor = Qt::yellow;
-        ui->statusbar->showMessage(tr("Focusing..."));
         ui->lockButton->setText(tr("Focusing..."));
+        showAlert(tr("Focusing..."));
         break;
     case QCamera::Locked:
-        indicationColor = Qt::darkGreen;
         ui->lockButton->setText(tr("Unlock"));
-        ui->statusbar->showMessage(tr("Focused"), 2000);
+        showAlert(tr("Focused"));
         break;
     case QCamera::Unlocked:
-        indicationColor = reason == QCamera::LockFailed ? Qt::red : Qt::black;
         ui->lockButton->setText(tr("Focus"));
-        if (reason == QCamera::LockFailed)
-            ui->statusbar->showMessage(tr("Focus Failed"), 2000);
+        if (reason == QCamera::LockFailed) {
+            showAlert(tr("Focus Failed"));
+        }
     }
-
-    QPalette palette = ui->lockButton->palette();
-    palette.setColor(QPalette::ButtonText, indicationColor);
-    ui->lockButton->setPalette(palette);
 }
 
 void Camera::takeImage()
@@ -322,12 +365,10 @@ void Camera::updateCameraState(QCamera::State state)
     switch (state) {
     case QCamera::ActiveState:
         ui->captureWidget->setEnabled(true);
-        ui->actionSettings->setEnabled(true);
         break;
     case QCamera::UnloadedState:
     case QCamera::LoadedState:
         ui->captureWidget->setEnabled(false);
-        ui->actionSettings->setEnabled(false);
     }
 }
 
@@ -336,7 +377,7 @@ void Camera::updateRecorderState(QMediaRecorder::State state)
     switch (state) {
     case QMediaRecorder::StoppedState:
         ui->recordButton->setEnabled(true);
-        ui->pauseButton->setEnabled(true);
+        ui->pauseButton->setEnabled(false);
         ui->stopButton->setEnabled(false);
         break;
     case QMediaRecorder::PausedState:
@@ -394,13 +435,13 @@ void Camera::displayCapturedImage()
 
 void Camera::readyForCapture(bool ready)
 {
-    ui->takeImageButton->setEnabled(ready);
+    ui->captureButton->setEnabled(ready);
 }
 
 void Camera::imageSaved(int id, const QString &fileName)
 {
     Q_UNUSED(id);
-    ui->statusbar->showMessage(tr("Captured \"%1\"").arg(QDir::toNativeSeparators(fileName)));
+    showAlert(tr("Captured: %1").arg(QDir::toNativeSeparators(fileName)));
 
     m_isCapturingImage = false;
     if (m_applicationExiting)

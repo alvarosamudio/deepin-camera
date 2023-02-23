@@ -6,12 +6,16 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFormLayout>
-#include <QGroupBox>
 #include <QScrollArea>
 #include <QDebug>
 #include <QMediaRecorder>
 #include <QMediaService>
-#include <QPushButton>
+
+#include <DComboBox>
+#include <DSlider>
+#include <DFrame>
+
+DWIDGET_USE_NAMESPACE
 
 VideoSettings::VideoSettings(QMediaRecorder *mediaRecorder, QWidget *parent) :
     DDialog(parent),
@@ -30,10 +34,10 @@ VideoSettings::VideoSettings(QMediaRecorder *mediaRecorder, QWidget *parent) :
     QWidget *scrollContent = new QWidget(scrollArea);
     QHBoxLayout *scrollLayout = new QHBoxLayout(scrollContent);
 
-    QGroupBox *audioGroup = new QGroupBox(tr("Audio"), scrollContent);
-    QFormLayout *audioForm = new QFormLayout(audioGroup);
+    DFrame *audioFrame = new DFrame(scrollContent);
+    QFormLayout *audioForm = new QFormLayout(audioFrame);
 
-    audioCodecBox = new QComboBox(audioGroup);
+    audioCodecBox = new DComboBox(audioFrame);
     audioCodecBox->addItem(tr("Default audio codec"), QVariant(QString()));
     const QStringList supportedAudioCodecs = mediaRecorder->supportedAudioCodecs();
     for (const QString &codecName : supportedAudioCodecs) {
@@ -42,22 +46,23 @@ VideoSettings::VideoSettings(QMediaRecorder *mediaRecorder, QWidget *parent) :
     }
     audioForm->addRow(tr("Audio Codec:"), audioCodecBox);
 
-    audioSampleRateBox = new QComboBox(audioGroup);
+    audioSampleRateBox = new DComboBox(audioFrame);
     const QList<int> supportedAudioSampleRates = mediaRecorder->supportedAudioSampleRates();
     for (int sampleRate : supportedAudioSampleRates)
         audioSampleRateBox->addItem(QString::number(sampleRate), QVariant(sampleRate));
     audioForm->addRow(tr("Sample Rate:"), audioSampleRateBox);
 
-    audioQualitySlider = new QSlider(Qt::Horizontal, audioGroup);
-    audioQualitySlider->setRange(0, int(QMultimedia::VeryHighQuality));
+    audioQualitySlider = new DSlider(Qt::Horizontal, audioFrame);
+    audioQualitySlider->setMinimum(0);
+    audioQualitySlider->setMaximum(int(QMultimedia::VeryHighQuality));
     audioForm->addRow(tr("Quality:"), audioQualitySlider);
 
-    scrollLayout->addWidget(audioGroup);
+    scrollLayout->addWidget(audioFrame);
 
-    QGroupBox *videoGroup = new QGroupBox(tr("Video"), scrollContent);
-    QFormLayout *videoForm = new QFormLayout(videoGroup);
+    DFrame *videoFrame = new DFrame(scrollContent);
+    QFormLayout *videoForm = new QFormLayout(videoFrame);
 
-    videoResolutionBox = new QComboBox(videoGroup);
+    videoResolutionBox = new DComboBox(videoFrame);
     videoResolutionBox->addItem(tr("Default"));
     const QList<QSize> supportedResolutions = mediaRecorder->supportedResolutions();
     for (const QSize &resolution : supportedResolutions) {
@@ -66,7 +71,7 @@ VideoSettings::VideoSettings(QMediaRecorder *mediaRecorder, QWidget *parent) :
     }
     videoForm->addRow(tr("Resolution:"), videoResolutionBox);
 
-    videoFramerateBox = new QComboBox(videoGroup);
+    videoFramerateBox = new DComboBox(videoFrame);
     videoFramerateBox->addItem(tr("Default"));
     const QList<qreal> supportedFrameRates = mediaRecorder->supportedFrameRates();
     for (qreal rate : supportedFrameRates) {
@@ -75,7 +80,7 @@ VideoSettings::VideoSettings(QMediaRecorder *mediaRecorder, QWidget *parent) :
     }
     videoForm->addRow(tr("Framerate:"), videoFramerateBox);
 
-    videoCodecBox = new QComboBox(videoGroup);
+    videoCodecBox = new DComboBox(videoFrame);
     videoCodecBox->addItem(tr("Default video codec"), QVariant(QString()));
     const QStringList supportedVideoCodecs = mediaRecorder->supportedVideoCodecs();
     for (const QString &codecName : supportedVideoCodecs) {
@@ -84,13 +89,14 @@ VideoSettings::VideoSettings(QMediaRecorder *mediaRecorder, QWidget *parent) :
     }
     videoForm->addRow(tr("Video Codec:"), videoCodecBox);
 
-    videoQualitySlider = new QSlider(Qt::Horizontal, videoGroup);
-    videoQualitySlider->setRange(0, int(QMultimedia::VeryHighQuality));
+    videoQualitySlider = new DSlider(Qt::Horizontal, videoFrame);
+    videoQualitySlider->setMinimum(0);
+    videoQualitySlider->setMaximum(int(QMultimedia::VeryHighQuality));
     videoForm->addRow(tr("Quality:"), videoQualitySlider);
 
-    scrollLayout->addWidget(videoGroup);
+    scrollLayout->addWidget(videoFrame);
 
-    containerFormatBox = new QComboBox(scrollContent);
+    containerFormatBox = new DComboBox(scrollContent);
     containerFormatBox->addItem(tr("Default container"), QVariant(QString()));
     const QStringList formats = mediaRecorder->supportedContainers();
     for (const QString &format : formats) {
@@ -108,7 +114,7 @@ VideoSettings::VideoSettings(QMediaRecorder *mediaRecorder, QWidget *parent) :
 
     addContent(widget);
 
-    addButton(tr("OK"), true, DDialog::ButtonNormal);
+    addButton(tr("OK"), true, DDialog::ButtonRecommend);
     addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     connect(this, &DDialog::accepted, this, &QDialog::accept);
     connect(this, &DDialog::rejected, this, &QDialog::reject);

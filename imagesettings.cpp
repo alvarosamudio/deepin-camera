@@ -12,6 +12,12 @@
 #include <QMediaService>
 #include <QPushButton>
 
+#include <DComboBox>
+#include <DSlider>
+#include <DFrame>
+
+DWIDGET_USE_NAMESPACE
+
 ImageSettings::ImageSettings(QCameraImageCapture *imageCapture, QWidget *parent) :
     DDialog(parent),
     imagecapture(imageCapture)
@@ -22,10 +28,10 @@ ImageSettings::ImageSettings(QCameraImageCapture *imageCapture, QWidget *parent)
     QWidget *widget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout(widget);
 
-    QGroupBox *groupBox = new QGroupBox(tr("Image"), widget);
-    QFormLayout *formLayout = new QFormLayout(groupBox);
+    DFrame *groupFrame = new DFrame(widget);
+    QFormLayout *formLayout = new QFormLayout(groupFrame);
 
-    imageResolutionBox = new QComboBox(groupBox);
+    imageResolutionBox = new DComboBox(groupFrame);
     imageResolutionBox->addItem(tr("Default Resolution"));
     const QList<QSize> supportedResolutions = imagecapture->supportedResolutions();
     for (const QSize &resolution : supportedResolutions) {
@@ -34,7 +40,7 @@ ImageSettings::ImageSettings(QCameraImageCapture *imageCapture, QWidget *parent)
     }
     formLayout->addRow(tr("Resolution:"), imageResolutionBox);
 
-    imageCodecBox = new QComboBox(groupBox);
+    imageCodecBox = new DComboBox(groupFrame);
     imageCodecBox->addItem(tr("Default image format"), QVariant(QString()));
     const QStringList supportedImageCodecs = imagecapture->supportedImageCodecs();
     for (const QString &codecName : supportedImageCodecs) {
@@ -43,14 +49,15 @@ ImageSettings::ImageSettings(QCameraImageCapture *imageCapture, QWidget *parent)
     }
     formLayout->addRow(tr("Image Format:"), imageCodecBox);
 
-    imageQualitySlider = new QSlider(Qt::Horizontal, groupBox);
-    imageQualitySlider->setRange(0, int(QMultimedia::VeryHighQuality));
+    imageQualitySlider = new DSlider(Qt::Horizontal, groupFrame);
+    imageQualitySlider->setMinimum(0);
+    imageQualitySlider->setMaximum(int(QMultimedia::VeryHighQuality));
     formLayout->addRow(tr("Quality:"), imageQualitySlider);
 
-    mainLayout->addWidget(groupBox);
+    mainLayout->addWidget(groupFrame);
     addContent(widget);
 
-    addButton(tr("OK"), true, DDialog::ButtonNormal);
+    addButton(tr("OK"), true, DDialog::ButtonRecommend);
     addButton(tr("Cancel"), false, DDialog::ButtonNormal);
     connect(this, &DDialog::accepted, this, &QDialog::accept);
     connect(this, &DDialog::rejected, this, &QDialog::reject);

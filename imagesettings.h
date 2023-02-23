@@ -3,15 +3,14 @@
 
 #include <QAudioEncoderSettings>
 #include <QVideoEncoderSettings>
-#include <QSlider>
-#include <QComboBox>
 #include <QEvent>
 
 #include <DDialog>
+#include <DComboBox>
+#include <DSlider>
 
 DWIDGET_USE_NAMESPACE
 
-class QComboBox;
 class QCameraImageCapture;
 
 class ImageSettings : public DDialog
@@ -32,9 +31,9 @@ private:
     QVariant boxValue(const QComboBox *box) const;
     void selectComboBoxItem(QComboBox *box, const QVariant &value);
 
-    QComboBox *imageCodecBox;
-    QSlider *imageQualitySlider;
-    QComboBox *imageResolutionBox;
+    DComboBox *imageCodecBox;
+    DSlider *imageQualitySlider;
+    DComboBox *imageResolutionBox;
     QCameraImageCapture *imagecapture;
 };
 
