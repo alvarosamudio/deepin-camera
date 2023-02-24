@@ -1,16 +1,21 @@
 # deepin-camera
 
-Camera application for Linux Deepin, built with Qt5 and DTK5.
+Camera application for the Deepin Desktop Environment, built with Qt5 and DTK5.
+
+## Features
+
+- Photo and video capture
+- Camera device selection
+- Exposure compensation control
+- Image resolution, format and quality settings
+- Video resolution, framerate, codec and quality settings
+- Deepin DTK5 interface (DMainWindow, DTitlebar, DDialog, DAboutDialog, DSwitchButton, DAlertControl)
 
 ## Build
 
 ```sh
-git clone https://github.com/alvarosamudio/deepin-camera.git
-cd deepin-camera
 ./build.sh
 ```
-
-The `build.sh` script sets up the required environment (custom g++-12, DTK5 headers/libs, C++ headers) and runs qmake + make.
 
 ## Run
 
@@ -18,7 +23,10 @@ The `build.sh` script sets up the required environment (custom g++-12, DTK5 head
 ./deepin-camera
 ```
 
-Dependencies: `qtbase5-dev`, `qt5-qmake`, `qtmultimedia5-dev`, DTK5 runtime libraries.
+## Dependencies
+
+- `qtbase5-dev`, `qt5-qmake`, `qtmultimedia5-dev`
+- DTK5 development package (`libdtkwidget-dev`)
 
 ## Mockup
 
