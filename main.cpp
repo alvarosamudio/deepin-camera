@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     app.setProductName(QObject::tr("Deepin Camera"));
     app.setApplicationDisplayName(QObject::tr("Deepin Camera"));
     app.setApplicationDescription(QObject::tr("Camera application for Deepin Desktop Environment"));
-    app.setApplicationLicense("GPL-3.0");
+    app.setApplicationLicense("MIT");
 
     Camera camera;
     camera.setMinimumSize(800, 600);

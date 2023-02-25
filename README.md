@@ -32,3 +32,7 @@ Camera application for the Deepin Desktop Environment, built with Qt5 and DTK5.
 
 ![mockup 1](doc/mockup/deepincamera1.png)
 ![mockup 2](doc/mockup/deepincamera2.png)
+
+## License
+
+MIT
